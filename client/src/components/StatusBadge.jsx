@@ -1,6 +1,6 @@
 export default function StatusBadge({ status }) {
   const label = (() => {
-    if (status === 'requested') return 'Requested'
+    if (status === 'requested') return 'Pending'
     if (status === 'accepted') return 'Accepted'
     if (status === 'in_progress') return 'In Progress'
     if (status === 'completed') return 'Completed'

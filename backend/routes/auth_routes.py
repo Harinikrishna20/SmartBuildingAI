@@ -27,14 +27,31 @@ def register():
     if User.query.filter_by(email=email).first():
         return error_response("Email already registered", 409)
 
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+    if latitude is not None:
+        try:
+            latitude = float(latitude)
+        except (TypeError, ValueError):
+            return error_response("Latitude must be a valid number", 400)
+        if latitude < -90 or latitude > 90:
+            return error_response("Latitude must be between -90 and 90", 400)
+    if longitude is not None:
+        try:
+            longitude = float(longitude)
+        except (TypeError, ValueError):
+            return error_response("Longitude must be a valid number", 400)
+        if longitude < -180 or longitude > 180:
+            return error_response("Longitude must be between -180 and 180", 400)
+
     user = User(
         name=name,
         email=email,
         phone=data.get("phone"),
         role=role,
         location=data.get("location"),
-        latitude=data.get("latitude"),
-        longitude=data.get("longitude"),
+        latitude=latitude,
+        longitude=longitude,
         service_category=data.get("service_category"),
         availability=data.get("availability", "Available" if role == "provider" else None),
         experience=data.get("experience"),

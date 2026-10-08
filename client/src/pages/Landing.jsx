@@ -58,13 +58,13 @@ export default function Landing() {
                 <span className="stats-dot" />
                 24/7 anomaly monitoring
               </div>
-              <div className="stats-chip muted">3.4x faster issue response</div>
+              <div className="stats-chip muted">Issue tracking and service coordination</div>
             </div>
 
             <div className="hero__meta">
               <div className="mini-trust">
                 <span className="trust-pill">Live</span>
-                1.8k properties monitored
+                Utility and maintenance overview
               </div>
               <div className="signal-grid">
                 <div>
@@ -93,7 +93,7 @@ export default function Landing() {
               <div className="dashboard-hero-card">
                 <div>
                   <span>System health</span>
-                  <strong>Excellent</strong>
+                  <strong>Awaiting data</strong>
                 </div>
                 <div className="ring-wrap">
                   <div className="ring-ring" />
@@ -102,27 +102,20 @@ export default function Landing() {
 
               <div className="dashboard-grid">
                 <div className="mini-panel mini-panel--alert">
-                  <span>Unusual Water Usage</span>
-                  <strong>850 L/day</strong>
+                  <span>Water usage</span>
+                  <strong>No readings yet</strong>
                 </div>
                 <div className="mini-panel">
-                  <span>Building Health</span>
-                  <strong>82/100</strong>
+                  <span>Building health</span>
+                  <strong>Not calculated</strong>
                 </div>
                 <div className="mini-panel mini-panel--wide">
-                  <span>Utility Trend</span>
-                  <div className="mini-bars">
-                    <i style={{ height: '45%' }} />
-                    <i style={{ height: '60%' }} />
-                    <i style={{ height: '58%' }} />
-                    <i style={{ height: '85%' }} />
-                    <i style={{ height: '100%' }} />
-                    <i style={{ height: '72%' }} />
-                  </div>
+                  <span>Utility trend</span>
+                  <strong>Waiting for readings</strong>
                 </div>
                 <div className="mini-panel mini-panel--success">
                   <span>Maintenance</span>
-                  <strong>Plumber matched</strong>
+                  <strong>No open requests</strong>
                 </div>
               </div>
             </div>

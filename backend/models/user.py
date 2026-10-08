@@ -20,6 +20,7 @@ class User(db.Model):
     service_category = db.Column(db.String(80), nullable=True)
     availability = db.Column(db.String(30), nullable=True)
     experience = db.Column(db.Integer, nullable=True)
+    is_demo = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -41,5 +42,6 @@ class User(db.Model):
             "service_category": self.service_category,
             "availability": self.availability,
             "experience": self.experience,
+            "is_demo": self.is_demo,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

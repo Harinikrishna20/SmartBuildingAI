@@ -11,7 +11,7 @@ class ServiceRequest(db.Model):
     provider_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     category = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    photo_url = db.Column(db.String(255), nullable=True)
+    photo_url = db.Column(db.Text, nullable=True)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     address = db.Column(db.String(255), nullable=True)

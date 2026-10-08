@@ -1,11 +1,10 @@
-import { BarChart3, Bell, Briefcase, Building2, FileText, House, MapPinned, ShieldCheck } from 'lucide-react'
+import { BarChart3, Bell, Briefcase, Building2, House, MapPinned, ShieldCheck } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const residentItems = [
   { label: 'Home', icon: House, to: '/resident' },
   { label: 'Insights', icon: BarChart3, to: '/resident/utility-insights' },
-  { label: 'Report', icon: FileText, to: '/resident/report-problem' },
-  { label: 'Jobs', icon: Briefcase, to: '/resident/my-requests' },
+  { label: 'Requests', icon: Briefcase, to: '/resident/my-requests' },
   { label: 'Alerts', icon: Bell, to: '/resident/notifications' },
   { label: 'Profile', icon: Building2, to: '/resident/profile' },
 ]

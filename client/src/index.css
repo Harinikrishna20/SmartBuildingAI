@@ -80,16 +80,6 @@ h1, h2, h3, h4, p {
   text-transform: uppercase;
 }
 
-.demo-tag {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: rgba(23, 167, 139, 0.08);
-  color: var(--teal-500);
-  font-size: 0.72rem;
-  padding: 0.42rem 0.75rem;
-}
-
 .primary-btn,
 .secondary-btn,
 .ghost-btn,
@@ -491,21 +481,6 @@ h1, h2, h3, h4, p {
 .mini-panel strong {
   color: var(--navy-800);
   font-size: 1.2rem;
-}
-
-.mini-bars {
-  display: flex;
-  align-items: end;
-  gap: 0.45rem;
-  height: 54px;
-  margin-top: 0.4rem;
-}
-
-.mini-bars i {
-  display: block;
-  flex: 1;
-  border-radius: 999px 999px 0 0;
-  background: linear-gradient(180deg, var(--teal-500), #abedd9);
 }
 
 .section {
@@ -981,6 +956,41 @@ h1, h2, h3, h4, p {
   gap: 0.4rem;
   color: var(--navy-800);
   font-size: 0.94rem;
+}
+
+.loop-step__marker {
+  display: grid;
+  place-items: center;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--slate-300);
+  border-radius: 50%;
+  background: white;
+  color: var(--slate-500);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.loop-step.is-complete .loop-step__marker {
+  border-color: var(--teal-500);
+  background: var(--teal-100);
+  color: var(--teal-500);
+}
+
+.loop-step.is-current {
+  color: var(--navy-900);
+  font-weight: 700;
+}
+
+.loop-step.is-current .loop-step__marker {
+  border: 2px solid var(--teal-500);
+  background: var(--teal-500);
+  color: white;
+}
+
+.loop-step.is-pending {
+  color: var(--slate-500);
 }
 
 .loop-arrow {

@@ -1,6 +1,8 @@
 import { Bell, Menu, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Navbar({ user, onMenuClick }) {
+  const navigate = useNavigate()
   const isProvider = user?.role === 'provider' || user?.role === 'serviceProvider'
 
   return (
@@ -16,7 +18,12 @@ export default function Navbar({ user, onMenuClick }) {
       </div>
 
       <div className="topbar__right">
-        <button type="button" className="icon-btn">
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => navigate(isProvider ? '/provider/notifications' : '/resident/notifications')}
+          aria-label="View notifications"
+        >
           <Bell size={18} />
           <span className="notification-dot" />
         </button>

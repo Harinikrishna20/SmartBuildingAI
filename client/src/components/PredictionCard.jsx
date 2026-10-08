@@ -1,9 +1,11 @@
 export default function PredictionCard({ title, current, average, predicted, normalRange, status }) {
+  const statusClass = status === 'Anomaly' ? 'status-badge--warning' : 'status-badge--success'
+
   return (
     <div className="prediction-card card-surface">
       <div className="prediction-card__header">
         <p className="eyebrow">{title}</p>
-        <span className="status-badge status-badge--warning">{status}</span>
+        <span className={`status-badge ${statusClass}`}>{status}</span>
       </div>
 
       <div className="prediction-grid">

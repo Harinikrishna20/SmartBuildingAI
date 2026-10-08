@@ -1,13 +1,21 @@
 import { BellRing, CheckCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { dashboardApi } from '../services/api'
+import { notifyNewAlerts } from '../services/localNotifications'
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
     dashboardApi.getNotifications()
-      .then(({ data = [] }) => setNotifications(data))
+      .then(async ({ data = [] }) => {
+        setNotifications(data)
+        try {
+          await notifyNewAlerts(data)
+        } catch (error) {
+          console.error('Unable to schedule local notifications', error)
+        }
+      })
       .catch((error) => {
         console.error('Failed to load notifications', error)
         setNotifications([])

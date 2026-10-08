@@ -81,14 +81,14 @@ class IssueClassifier:
     @staticmethod
     def _reason(category, issue, severity):
         if category == "Plumbing":
-            return "Continuous water leakage can cause property damage and significant water wastage."
+            return "The description matches plumbing-related terms. Confirm the affected fixture and severity during inspection."
         if category == "Electrical Issue":
-            return "Electrical faults may affect safety and power stability in the property."
+            return "The description matches electrical-related terms. Treat exposed wiring, sparks, or burning smells as urgent safety concerns."
         if category == "Appliance Repair":
-            return "Appliance faults can disrupt daily usage and may worsen if ignored."
+            return "The description matches appliance-related terms. A technician should confirm the cause."
         if category == "Structural Damage":
-            return "Structural issues may affect building safety and long-term durability."
-        return "The issue requires timely inspection to prevent escalation."
+            return "The description matches structural-damage terms. A qualified inspection is needed to assess risk."
+        return "The description could not be confidently categorized. Review the issue details before assigning a provider."
 
     @staticmethod
     def _level(score):

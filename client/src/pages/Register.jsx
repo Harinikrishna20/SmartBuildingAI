@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Eye, EyeOff, Lock, Mail, MapPin, Phone, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { getCurrentCoordinates } from '../services/location'
 
 const categories = ['Electrician', 'Plumber', 'Appliance Repair', 'Carpenter', 'Cleaning', 'Other']
 
@@ -18,15 +19,39 @@ export default function Register() {
     workingLocation: '',
     availability: 'Available',
     experience: '',
+    latitude: '',
+    longitude: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
+  const [locationMessage, setLocationMessage] = useState('')
+  const [locating, setLocating] = useState(false)
   const navigate = useNavigate()
   const { register } = useAuth()
 
   const handleChange = (event) => {
     setFormData((prev) => ({ ...prev, [event.target.name]: event.target.value }))
+  }
+
+  const handleUseCurrentLocation = async () => {
+    setLocating(true)
+    setLocationMessage('Your location is used to find nearby maintenance service providers and attach a location to your requests.')
+    try {
+      const coordinates = await getCurrentCoordinates()
+      setFormData((prev) => ({
+        ...prev,
+        latitude: String(coordinates.latitude),
+        longitude: String(coordinates.longitude),
+        location: prev.location || prev.workingLocation || 'Current location',
+        workingLocation: prev.workingLocation || 'Current location',
+      }))
+      setLocationMessage('✓ Current location detected')
+    } catch (error) {
+      setLocationMessage(error.message)
+    } finally {
+      setLocating(false)
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -39,7 +64,12 @@ export default function Register() {
     try {
       const normalizedPayload = {
         ...formData,
+        name: formData.fullName,
         role: formData.role === 'provider' || formData.role === 'serviceProvider' ? 'provider' : 'resident',
+        location: formData.location || formData.workingLocation || '',
+        serviceCategory: formData.serviceCategory,
+        service_category: formData.serviceCategory,
+        workingLocation: formData.workingLocation || formData.location || '',
       }
       const user = await register(normalizedPayload)
       const isProvider = user?.role === 'provider' || user?.role === 'serviceProvider'
@@ -96,10 +126,26 @@ export default function Register() {
             </div>
 
             {formData.role === 'resident' ? (
-              <div className="input-wrap full-span">
-                <MapPin size={16} />
-                <input name="location" value={formData.location} onChange={handleChange} placeholder="Location" required />
-              </div>
+              <>
+                <div className="input-wrap full-span">
+                  <MapPin size={16} />
+                  <input name="location" value={formData.location} onChange={handleChange} placeholder="Location" required />
+                </div>
+                <div className="full-span">
+                  <button type="button" className="secondary-btn" onClick={handleUseCurrentLocation} disabled={locating}>
+                    <MapPin size={16} /> {locating ? 'Finding location...' : '📍 Use My Current Location'}
+                  </button>
+                </div>
+                <div className="full-span">
+                  {locationMessage ? <p className="field-hint">{locationMessage}</p> : null}
+                  {formData.latitude && formData.longitude ? (
+                    <div className="coords-grid">
+                      <input readOnly value={formData.latitude} placeholder="Latitude" />
+                      <input readOnly value={formData.longitude} placeholder="Longitude" />
+                    </div>
+                  ) : null}
+                </div>
+              </>
             ) : (
               <>
                 <div className="input-wrap input-wrap--select">
@@ -112,6 +158,20 @@ export default function Register() {
                 <div className="input-wrap">
                   <MapPin size={16} />
                   <input name="workingLocation" value={formData.workingLocation} onChange={handleChange} placeholder="Working Location" required />
+                </div>
+                <div className="full-span">
+                  <button type="button" className="secondary-btn" onClick={handleUseCurrentLocation} disabled={locating}>
+                    <MapPin size={16} /> {locating ? 'Finding location...' : '📍 Use My Current Location'}
+                  </button>
+                </div>
+                <div className="full-span">
+                  {locationMessage ? <p className="field-hint">{locationMessage}</p> : null}
+                  {formData.latitude && formData.longitude ? (
+                    <div className="coords-grid">
+                      <input readOnly value={formData.latitude} placeholder="Latitude" />
+                      <input readOnly value={formData.longitude} placeholder="Longitude" />
+                    </div>
+                  ) : null}
                 </div>
                 <div className="input-wrap input-wrap--select">
                   <select name="availability" value={formData.availability} onChange={handleChange}>

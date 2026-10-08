@@ -77,6 +77,7 @@ function ProviderShell() {
           <Routes>
             <Route index element={<ProviderDashboard />} />
             <Route path="nearby-requests" element={<NearbyRequests />} />
+            <Route path="request-details/:id" element={<RequestDetails />} />
             <Route path="my-jobs" element={<MyJobs />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="profile" element={<Profile />} />

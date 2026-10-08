@@ -1,6 +1,6 @@
 import { AlertTriangle, ArrowRight } from 'lucide-react'
 
-export default function AlertCard({ title, description, normal, predicted, onAction, buttonText = 'Investigate' }) {
+export default function AlertCard({ title, description, normal, predicted, note, onAction, buttonText = 'Investigate' }) {
   return (
     <div className="alert-card card-surface">
       <div className="alert-card__header">
@@ -28,9 +28,7 @@ export default function AlertCard({ title, description, normal, predicted, onAct
         <ArrowRight size={16} />
       </button>
 
-      <p className="alert-note">
-        This pattern may indicate leakage or unusually high usage. Please check the situation before creating a maintenance request.
-      </p>
+      {note ? <p className="alert-note">{note}</p> : null}
     </div>
   )
 }

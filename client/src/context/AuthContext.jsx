@@ -18,9 +18,6 @@ export function AuthProvider({ children }) {
     if (user) {
       const normalizedUser = { ...user, role: normalizeRole(user.role) }
       localStorage.setItem('smartbuilding-user', JSON.stringify(normalizedUser))
-      if (normalizedUser.role !== user.role) {
-        setUser(normalizedUser)
-      }
     } else {
       localStorage.removeItem('smartbuilding-user')
     }
@@ -49,7 +46,16 @@ export function AuthProvider({ children }) {
   }
 
   const register = async (payload) => {
-    const response = await authApi.register(payload)
+    const nextPayload = {
+      ...payload,
+      name: payload.name || payload.fullName,
+      location: payload.location || payload.workingLocation || '',
+      serviceCategory: payload.serviceCategory || payload.service_category || null,
+      latitude: payload.latitude ? Number(payload.latitude) : null,
+      longitude: payload.longitude ? Number(payload.longitude) : null,
+      experience: payload.experience ? Number(payload.experience) : null,
+    }
+    const response = await authApi.register(nextPayload)
     const nextUser = response.user ? { ...response.user, role: normalizeRole(response.user.role) } : null
     setToken(response.token)
     setUser(nextUser)

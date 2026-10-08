@@ -11,20 +11,35 @@ export default function MyRequests() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    requestApi.getAll()
-      .then(({ requests: data = [] }) => setRequests(data))
-      .catch((error) => {
-        console.error('Failed to load requests', error)
-        setRequests([])
-      })
+    let active = true
+    const loadRequests = () => {
+      requestApi.getAll()
+        .then(({ requests: data = [] }) => {
+          if (active) setRequests(data)
+        })
+        .catch((error) => {
+          if (active) {
+            console.error('Failed to load requests', error)
+            setRequests([])
+          }
+        })
+    }
+
+    loadRequests()
+    const timer = setInterval(loadRequests, 4000)
+    return () => {
+      active = false
+      clearInterval(timer)
+    }
   }, [])
 
   const filteredRequests = useMemo(() => {
     if (activeTab === 'All') return requests
-    if (activeTab === 'Requested') return requests.filter((request) => request.status === 'requested')
-    if (activeTab === 'Accepted') return requests.filter((request) => request.status === 'accepted')
-    if (activeTab === 'In Progress') return requests.filter((request) => request.status === 'in_progress')
-    return requests.filter((request) => request.status === 'completed')
+    const tabNorm = activeTab.toLowerCase().replace(/\s+/g, '_')
+    return requests.filter((request) => {
+      const st = (request.status || '').toLowerCase().replace(/\s+/g, '_')
+      return st === tabNorm
+    })
   }, [activeTab, requests])
 
   return (

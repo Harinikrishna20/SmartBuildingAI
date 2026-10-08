@@ -1,6 +1,8 @@
+import math
+
 from flask import Blueprint, request
 
-from models import UtilityUsage, User
+from models import UtilityUsage, db
 from services.ai_prediction import build_prediction_for_user
 from services.anomaly_detection import assess_anomaly
 from services.health_score import compute_health_score
@@ -10,6 +12,36 @@ from utils.auth import get_current_user, token_required
 from utils.responses import error_response, success_response
 
 utility_bp = Blueprint("utility_bp", __name__)
+
+
+@utility_bp.route("/api/utility/readings", methods=["POST"])
+@token_required
+def record_utility_reading():
+    current_user = get_current_user()
+    if current_user.role != "resident":
+        return error_response("Only residents can record utility readings", 403)
+
+    data = request.get_json(silent=True) or {}
+    utility_type = (data.get("utility_type") or "").strip().lower()
+    if utility_type not in {"water", "electricity"}:
+        return error_response("Utility type must be water or electricity", 400)
+
+    try:
+        usage_value = float(data.get("usage_value"))
+    except (TypeError, ValueError):
+        return error_response("Usage value must be a valid number", 400)
+    if not math.isfinite(usage_value) or usage_value <= 0:
+        return error_response("Usage value must be greater than zero", 400)
+
+    reading = UtilityUsage(
+        resident_id=current_user.id,
+        utility_type=utility_type,
+        usage_value=usage_value,
+        unit="L" if utility_type == "water" else "kWh",
+    )
+    db.session.add(reading)
+    db.session.commit()
+    return success_response({"reading": reading.to_dict()}, 201)
 
 
 @utility_bp.route("/api/predictions/water", methods=["GET"])
@@ -33,6 +65,8 @@ def electricity_prediction():
 def water_utility():
     current_user = get_current_user()
     prediction = build_prediction_for_user(current_user.id, "water")
+    if not prediction["has_data"]:
+        return success_response({"utility": "water", "has_data": False, "message": prediction["explanation"]})
     result = assess_anomaly(
         "water",
         prediction["current_usage"],
@@ -49,6 +83,8 @@ def water_utility():
 def electricity_utility():
     current_user = get_current_user()
     prediction = build_prediction_for_user(current_user.id, "electricity")
+    if not prediction["has_data"]:
+        return success_response({"utility": "electricity", "has_data": False, "message": prediction["explanation"]})
     result = assess_anomaly(
         "electricity",
         prediction["current_usage"],

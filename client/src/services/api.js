@@ -1,6 +1,13 @@
 import axios from 'axios'
+import { Capacitor } from '@capacitor/core'
 
-const API_BASE_URL = 'http://localhost:5000/api'
+const defaultApiUrl = Capacitor.isNativePlatform()
+  ? 'http://10.0.2.2:5000/api'
+  : 'http://localhost:5000/api'
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL || defaultApiUrl
+const API_BASE_URL = configuredApiUrl.endsWith('/api')
+  ? configuredApiUrl
+  : `${configuredApiUrl.replace(/\/$/, '')}/api`
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -15,6 +22,17 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.error
+    if (message) error.message = message
+    else if (!error.response) error.message = 'Unable to connect to SmartBuilding AI server. Check your internet connection and try again.'
+    else if (error.response.status >= 500) error.message = 'SmartBuilding AI is temporarily unavailable. Please try again shortly.'
+    return Promise.reject(error)
+  },
+)
 
 const unwrapData = (response) => response?.data?.data ?? response?.data ?? response
 
@@ -57,8 +75,17 @@ const normalizeRequest = (request) => {
 export const authApi = {
   register: async (payload) => {
     const normalizedPayload = {
-      ...payload,
+      name: payload.name || payload.fullName,
+      email: payload.email,
+      phone: payload.phone,
+      password: payload.password,
       role: normalizeRole(payload.role || 'resident'),
+      location: payload.location || payload.workingLocation || '',
+      latitude: payload.latitude ? Number(payload.latitude) : null,
+      longitude: payload.longitude ? Number(payload.longitude) : null,
+      service_category: payload.serviceCategory || payload.service_category || null,
+      availability: payload.availability || null,
+      experience: payload.experience ? Number(payload.experience) : null,
     }
     const response = await api.post('/auth/register', normalizedPayload)
     const data = unwrapData(response)
@@ -107,6 +134,12 @@ export const requestApi = {
     return { success: true, request: normalizeRequest(data.request || data) }
   },
 
+  assignProvider: async (requestId, providerId) => {
+    const response = await api.post(`/requests/${requestId}/provider`, { provider_id: providerId })
+    const data = unwrapData(response)
+    return { success: true, request: normalizeRequest(data.request || data) }
+  },
+
   updateStatus: async (requestId, status) => {
     const backendStatus = normalizeBackendStatus(status)
     const response = await api.patch(`/requests/${requestId}/status`, { status: backendStatus })
@@ -116,8 +149,20 @@ export const requestApi = {
 }
 
 export const providerApi = {
-  getNearby: async () => {
-    const response = await api.get('/providers/nearby')
+  setupDemoProviders: async ({ latitude, longitude } = {}) => {
+    const response = await api.post('/providers/demo-setup', { latitude, longitude })
+    return { success: true, data: unwrapData(response) }
+  },
+
+  getNearby: async ({ latitude, longitude, category, radius = 10 } = {}) => {
+    const response = await api.get('/providers/nearby', {
+      params: {
+        latitude,
+        longitude,
+        category,
+        radius,
+      },
+    })
     const data = unwrapData(response)
     const providers = Array.isArray(data.providers) ? data.providers : Array.isArray(data) ? data : []
     return { success: true, providers }
@@ -128,6 +173,11 @@ export const providerApi = {
     const data = unwrapData(response)
     const requests = Array.isArray(data.requests) ? data.requests : []
     return { success: true, requests }
+  },
+
+  rejectRequest: async (requestId) => {
+    const response = await api.post(`/requests/${requestId}/reject`)
+    return { success: true, data: unwrapData(response) }
   },
 
   getJobs: async () => {
@@ -142,9 +192,24 @@ export const providerApi = {
     const data = unwrapData(response)
     return { success: true, profile: data.provider || data }
   },
+
+  updateAvailability: async (updates) => {
+    const response = await api.patch('/providers/availability', updates)
+    const data = unwrapData(response)
+    return { success: true, profile: data.provider || data }
+  },
 }
 
 export const predictionApi = {
+  recordReading: async ({ utilityType, usageValue }) => {
+    const response = await api.post('/utility/readings', {
+      utility_type: utilityType,
+      usage_value: Number(usageValue),
+    })
+    const data = unwrapData(response)
+    return { success: true, reading: data.reading }
+  },
+
   getWater: async () => {
     const response = await api.get('/predictions/water')
     const data = unwrapData(response)
@@ -165,9 +230,31 @@ export const predictionApi = {
     const data = unwrapData(response)
     return { success: true, data: data.data || data }
   },
+
+  classifyIssue: async (description) => {
+    const response = await api.post('/ai/classify-issue', { description })
+    return { success: true, result: unwrapData(response) }
+  },
+}
+
+export const publicUtilityApi = {
+  getHistory: async (utilityType) => {
+    const response = await api.get('/public-utilities', { params: { type: utilityType } })
+    return { success: true, data: unwrapData(response) }
+  },
+
+  investigateHistory: async (utilityType) => {
+    const response = await api.get('/public-utilities/investigation', { params: { type: utilityType } })
+    return { success: true, data: unwrapData(response) }
+  },
 }
 
 export const dashboardApi = {
+  getHealthScore: async () => {
+    const response = await api.get('/health-score')
+    return { success: true, data: unwrapData(response) }
+  },
+
   getNotifications: async () => {
     const response = await api.get('/notifications')
     const data = unwrapData(response)

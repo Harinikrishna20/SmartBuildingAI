@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { providerApi, requestApi } from '../services/api'
 
@@ -7,7 +8,9 @@ export default function NearbyRequests() {
   const [distance, setDistance] = useState('All')
   const [category, setCategory] = useState('All')
   const [priority, setPriority] = useState('All')
+  const [actionMessage, setActionMessage] = useState('')
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     providerApi.getRequests()
@@ -39,8 +42,19 @@ export default function NearbyRequests() {
     try {
       await requestApi.acceptRequest(requestId, user)
       setRequests((prev) => prev.filter((request) => request.id !== requestId))
+      setActionMessage('Request accepted. Find it in My Jobs to update its status.')
     } catch (error) {
-      console.error('Failed to accept request', error)
+      setActionMessage(error.message || 'Unable to accept this request. Please try again.')
+    }
+  }
+
+  const handleReject = async (requestId) => {
+    try {
+      await providerApi.rejectRequest(requestId)
+      setRequests((prev) => prev.filter((request) => request.id !== requestId))
+      setActionMessage('Request dismissed.')
+    } catch (error) {
+      setActionMessage(error.message || 'Unable to dismiss this request. Please try again.')
     }
   }
 
@@ -71,6 +85,8 @@ export default function NearbyRequests() {
         </select>
       </div>
 
+      {actionMessage ? <p className="field-hint" role="status">{actionMessage}</p> : null}
+
       <div className="request-grid request-grid--list">
         {jobs.map((request) => (
           <div key={request.id} className="request-card card-surface">
@@ -84,10 +100,12 @@ export default function NearbyRequests() {
             <p className="request-card__desc">{request.description}</p>
             <div className="request-card__actions">
               <button type="button" className="primary-btn" onClick={() => handleAccept(request.id)}>Accept Request</button>
-              <button type="button" className="secondary-btn">View Details</button>
+              <button type="button" className="secondary-btn" onClick={() => handleReject(request.id)}>Reject</button>
+              <button type="button" className="secondary-btn" onClick={() => navigate(`/provider/request-details/${request.id}`)}>View Details</button>
             </div>
           </div>
         ))}
+        {!jobs.length ? <div className="empty-state card-surface"><h3>No matching requests</h3><p>New requests for your services will appear here.</p></div> : null}
       </div>
     </div>
   )

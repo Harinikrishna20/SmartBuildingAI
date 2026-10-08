@@ -5,13 +5,13 @@ export default function Profile() {
   const { user } = useAuth()
   const isProvider = user?.role === 'provider' || user?.role === 'serviceProvider'
   const [formData, setFormData] = useState({
-    name: user?.name || user?.fullName || 'Harini Perera',
-    email: user?.email || 'harini@smartbuilding.ai',
-    phone: user?.phone || '+94 77 123 4567',
-    serviceCategory: user?.service_category || user?.serviceCategory || 'Plumber',
-    workingLocation: user?.location || user?.workingLocation || 'Colombo 06',
-    availability: user?.availability || 'Available',
-    experience: user?.experience || '7 years',
+    name: user?.name || user?.fullName || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    serviceCategory: user?.service_category || user?.serviceCategory || '',
+    workingLocation: user?.location || user?.workingLocation || '',
+    availability: user?.availability || '',
+    experience: user?.experience ?? '',
   })
 
   return (
@@ -59,7 +59,7 @@ export default function Profile() {
         ) : (
           <div className="field-group">
             <label>Location</label>
-            <input value="Colombo 07" readOnly />
+            <input value={formData.workingLocation} readOnly />
           </div>
         )}
 
